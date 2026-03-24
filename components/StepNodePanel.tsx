@@ -46,7 +46,7 @@ export function StepNodePanel() {
       <div className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden border-l bg-card">
         <div className="flex items-start justify-between gap-2 border-b px-4 py-3">
           <div className="min-w-0">
-            <h2 className="text-sm font-semibold">Flow text</h2>
+            <h2 className="text-sm font-semibold">Note</h2>
             <p className="font-mono text-xs text-muted-foreground">
               {flowText.id}
             </p>
@@ -62,10 +62,20 @@ export function StepNodePanel() {
         </div>
         <ScrollArea className="min-h-0 flex-1">
           <div className="space-y-3 p-4">
+            <StepColorPicker
+              compact
+              label="Background color"
+              helperText={null}
+              value={flowText.color}
+              onChange={(hex) =>
+                updateTextNode(flowText.id, { color: hex })
+              }
+            />
+            <Separator />
             <div className="grid gap-2">
-              <Label htmlFor="flow-text-body">Text</Label>
+              <Label htmlFor="note-body">Text</Label>
               <Textarea
-                id="flow-text-body"
+                id="note-body"
                 value={flowText.text}
                 onChange={(e) =>
                   updateTextNode(flowText.id, { text: e.target.value })
@@ -76,8 +86,8 @@ export function StepNodePanel() {
               />
             </div>
             <p className="text-xs text-muted-foreground">
-              This text is only for the diagram— it is not part of the
-              simulator steps.
+              Notes are only on the diagram—they are not part of the simulator
+              steps.
             </p>
           </div>
         </ScrollArea>

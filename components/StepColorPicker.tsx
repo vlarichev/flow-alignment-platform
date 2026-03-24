@@ -8,26 +8,42 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+const DEFAULT_HELPER =
+  "Use the same color on related steps to group them when walking through the demo.";
+
 type Props = {
   value: string | null | undefined;
   onChange: (hex: string | null) => void;
   /** Tighter layout for flow overview cards */
   compact?: boolean;
+  /** Defaults to "Group color" (steps). */
+  label?: string;
+  /** Extra description under the label. Pass `null` to hide. */
+  helperText?: string | null;
 };
 
-export function StepColorPicker({ value, onChange, compact }: Props) {
+export function StepColorPicker({
+  value,
+  onChange,
+  compact,
+  label = "Group color",
+  helperText,
+}: Props) {
   const normalized = normalizeStepColor(value);
   const pickerFallback = normalized ?? "#64748b";
+  const helper =
+    helperText === undefined
+      ? !compact
+        ? DEFAULT_HELPER
+        : null
+      : helperText;
 
   return (
     <div className={cn("space-y-2", compact && "space-y-1.5")}>
       <div>
-        <Label className={cn(!compact && "text-sm")}>Group color</Label>
-        {!compact ? (
-          <p className="mt-0.5 text-xs text-muted-foreground">
-            Use the same color on related steps to group them when walking
-            through the demo.
-          </p>
+        <Label className={cn(!compact && "text-sm")}>{label}</Label>
+        {helper ? (
+          <p className="mt-0.5 text-xs text-muted-foreground">{helper}</p>
         ) : null}
       </div>
       <div className="flex flex-wrap items-center gap-2">

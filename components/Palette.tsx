@@ -40,7 +40,7 @@ export function Palette() {
           onClick={() => addTextNode()}
         >
           <TextQuote className="h-4 w-4" />
-          Add flow text
+          Add note
         </Button>
         <Button
           type="button"
@@ -72,7 +72,7 @@ export function Palette() {
         <p className="text-xs text-muted-foreground">
           With the canvas focused: <span className="font-medium text-foreground">Delete</span>{" "}
           or <span className="font-medium text-foreground">Backspace</span> removes the
-          selected step, flow text, or connection.
+          selected step, note, or connection.
         </p>
       </CardContent>
     </Card>

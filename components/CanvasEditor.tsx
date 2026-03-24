@@ -241,7 +241,11 @@ export function CanvasEditor() {
           nodeStrokeWidth={2}
           nodeStrokeColor="hsl(var(--border))"
           nodeColor={(node) => {
-            if (node.type === "flowText") return "#fbbf24";
+            if (node.type === "flowText") {
+              const tn = textNodes.find((t) => t.id === node.id);
+              const c = normalizeStepColor(tn?.color ?? null);
+              return c ?? "#94a3b8";
+            }
             const st = steps.find((s) => s.id === node.id);
             const c = normalizeStepColor(st?.color ?? null);
             return c ?? "#94a3b8";

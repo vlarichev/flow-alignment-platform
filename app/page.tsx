@@ -2,6 +2,7 @@
 
 import { ReactFlowProvider } from "@xyflow/react";
 
+import { AppCredits } from "@/components/AppCredits";
 import { CanvasEditor } from "@/components/CanvasEditor";
 import { ConnectionDialog } from "@/components/ConnectionDialog";
 import { FileManager } from "@/components/FileManager";
@@ -28,6 +29,7 @@ export default function HomePage() {
           <StepNodePanel />
         </aside>
       </main>
+      <AppCredits />
       <ConnectionDialog />
       <SimulatorView />
     </div>

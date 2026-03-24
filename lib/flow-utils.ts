@@ -118,7 +118,17 @@ function normalizeTextNodes(raw: unknown): FlowTextNode[] {
         ? o.height
         : 120;
     if (!id || !id.length) continue;
-    out.push({ id, text, x, y, width, height });
+    const node: FlowTextNode = { id, text, x, y, width, height };
+    if ("color" in o) {
+      if (o.color === null || o.color === "") {
+        node.color = null;
+      } else if (typeof o.color === "string" && o.color.trim()) {
+        node.color = normalizeStepColor(o.color);
+      } else {
+        node.color = null;
+      }
+    }
+    out.push(node);
   }
   return out;
 }

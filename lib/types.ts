@@ -68,7 +68,7 @@ export interface Connection {
 /** Parsed from JSON before ids are normalized. */
 export type IncomingConnection = Omit<Connection, "id"> & { id?: string };
 
-/** Free-form label on the canvas (not a simulation step). */
+/** Free-form note on the canvas (not a simulation step). */
 export interface FlowTextNode {
   id: string;
   text: string;
@@ -77,6 +77,8 @@ export interface FlowTextNode {
   /** Pixel size on the canvas (resize with corner/edge handles). */
   width?: number;
   height?: number;
+  /** Optional hex color for border accent / grouping (same presets as steps). */
+  color?: string | null;
 }
 
 export interface FlowDocument {

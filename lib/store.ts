@@ -130,7 +130,9 @@ export interface FlowStore {
   addTextNode: () => void;
   updateTextNode: (
     id: string,
-    patch: Partial<Pick<FlowTextNode, "text" | "x" | "y" | "width" | "height">>,
+    patch: Partial<
+      Pick<FlowTextNode, "text" | "x" | "y" | "width" | "height" | "color">
+    >,
   ) => void;
   deleteTextNode: (id: string) => void;
   setSelectedTextNodeId: (id: string | null) => void;
@@ -324,6 +326,7 @@ export const useFlowStore = create<FlowStore>((set, get) => ({
       y,
       width: 280,
       height: 120,
+      color: null,
     };
     set({
       textNodes: [...s.textNodes, note],

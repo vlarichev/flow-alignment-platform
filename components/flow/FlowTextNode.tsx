@@ -3,6 +3,7 @@
 import { NodeResizer, type NodeProps } from "@xyflow/react";
 
 import { cn } from "@/lib/utils";
+import { normalizeStepColor } from "@/lib/step-colors";
 import { useFlowStore } from "@/lib/store";
 
 export type FlowTextNodeData = {
@@ -17,7 +18,8 @@ export function FlowTextNode(props: NodeProps) {
   );
   const updateTextNode = useFlowStore((s) => s.updateTextNode);
 
-  const text = note?.text?.trim() ? note.text : "Flow note — edit in the panel";
+  const text = note?.text?.trim() ? note.text : "Note — edit in the panel";
+  const accent = normalizeStepColor(note?.color ?? null);
 
   return (
     <>
@@ -39,14 +41,28 @@ export function FlowTextNode(props: NodeProps) {
       />
       <div
         className={cn(
-          "box-border h-full w-full overflow-auto rounded-md border border-dashed px-3 py-2 text-left shadow-sm transition-shadow",
-          "border-amber-600/45 bg-amber-500/[0.12] dark:border-amber-400/40 dark:bg-amber-400/[0.1]",
+          "box-border h-full w-full overflow-auto rounded-md border px-3 py-2 text-left shadow-sm transition-shadow",
+          accent
+            ? "border-border bg-card"
+            : "border-dashed border-muted-foreground/35 bg-muted/30",
           selected &&
             "ring-2 ring-ring ring-offset-2 ring-offset-background",
         )}
+        style={
+          accent
+            ? { borderTopWidth: 3, borderTopColor: accent }
+            : undefined
+        }
       >
-        <div className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-amber-900/80 dark:text-amber-100/80">
-          Flow text
+        <div
+          className={cn(
+            "mb-1 text-[10px] font-semibold uppercase tracking-wide",
+            accent
+              ? "text-muted-foreground"
+              : "text-muted-foreground/90",
+          )}
+        >
+          Note
         </div>
         <div className="whitespace-pre-wrap text-sm leading-snug text-foreground">
           {text}
