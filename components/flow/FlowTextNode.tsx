@@ -17,6 +17,7 @@ export function FlowTextNode(props: NodeProps) {
     s.textNodes.find((t) => t.id === data.textId),
   );
   const updateTextNode = useFlowStore((s) => s.updateTextNode);
+  const pushUndoSnapshot = useFlowStore((s) => s.pushUndoSnapshot);
 
   const text = note?.text?.trim() ? note.text : "Note — edit in the panel";
   const accent = normalizeStepColor(note?.color ?? null);
@@ -30,13 +31,20 @@ export function FlowTextNode(props: NodeProps) {
         color="hsl(var(--ring))"
         handleClassName="!border-2 !border-background"
         lineClassName="!border-ring"
+        onResizeStart={() => {
+          pushUndoSnapshot();
+        }}
         onResize={(_, p) => {
-          updateTextNode(data.textId, {
-            x: p.x,
-            y: p.y,
-            width: p.width,
-            height: p.height,
-          });
+          updateTextNode(
+            data.textId,
+            {
+              x: p.x,
+              y: p.y,
+              width: p.width,
+              height: p.height,
+            },
+            true,
+          );
         }}
       />
       <div

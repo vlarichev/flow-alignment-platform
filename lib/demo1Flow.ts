@@ -418,7 +418,7 @@ const stepIds = steps.map((s) => s.id);
 export const demo1FlowDocument: FlowDocument = {
   flowMetadata: {
     name: "Example: Hannover Messe operations (AI orchestration)",
-    version: "v1.0",
+    version: "v1.2",
     mode: "linear",
     description:
       "Sample 11-step flow (trade-show style): order → manufacturing → anomaly → rescheduling. Use it as a template — swap in your own agents and tools.",

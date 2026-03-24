@@ -48,6 +48,19 @@ function derivePrimarySelection(
 
 const STORAGE_KEY = "hannover-flow-v1";
 
+const MAX_UNDO_STACK = 5;
+
+function clonePersisted(get: () => FlowStore): PersistedFlowState {
+  const s = get();
+  return structuredClone({
+    flowMetadata: s.flowMetadata,
+    steps: s.steps,
+    connections: s.connections,
+    nodePositions: s.nodePositions,
+    textNodes: s.textNodes,
+  });
+}
+
 export type ConnectionModeState =
   | { status: "idle" }
   | { status: "pickSource" }
@@ -133,6 +146,8 @@ export interface FlowStore {
     patch: Partial<
       Pick<FlowTextNode, "text" | "x" | "y" | "width" | "height" | "color">
     >,
+    /** Set true for resize/drag intermediate updates (undo pushed once at start). */
+    skipUndo?: boolean,
   ) => void;
   deleteTextNode: (id: string) => void;
   setSelectedTextNodeId: (id: string | null) => void;
@@ -180,6 +195,11 @@ export interface FlowStore {
   simulatorPlay: () => void;
   simulatorReset: () => void;
   simulatorNext: (connection: Connection) => void;
+
+  /** In-memory undo (last 5 flow snapshots); cleared on load/import/new flow. */
+  undoStack: PersistedFlowState[];
+  pushUndoSnapshot: () => void;
+  undo: () => void;
 }
 
 function initialSimulator(): SimulatorState {
@@ -210,6 +230,39 @@ export const useFlowStore = create<FlowStore>((set, get) => ({
 
   flowLibraryRevision: 0,
 
+  undoStack: [],
+
+  pushUndoSnapshot: () => {
+    const snap = clonePersisted(get);
+    set((state) => ({
+      undoStack: [...state.undoStack, snap].slice(-MAX_UNDO_STACK),
+    }));
+  },
+
+  undo: () => {
+    const stack = get().undoStack;
+    if (stack.length === 0) return;
+    const nextStack = stack.slice(0, -1);
+    const toRestore = stack[stack.length - 1]!;
+    set({
+      undoStack: nextStack,
+      flowMetadata: toRestore.flowMetadata,
+      steps: toRestore.steps,
+      connections: toRestore.connections,
+      nodePositions: toRestore.nodePositions ?? defaultNodePositions(),
+      textNodes: toRestore.textNodes ?? [],
+      selectedNodeIds: [],
+      selectedStepId: null,
+      selectedEdgeId: null,
+      selectedTextNodeId: null,
+      connectionMode: { status: "idle" },
+      pendingConnection: null,
+      connectionDialogOpen: false,
+      simulator: initialSimulator(),
+    });
+    schedulePersist(get);
+  },
+
   hydrateFromStorage: () => {
     const loaded = loadFromStorage();
     if (loaded) {
@@ -222,6 +275,7 @@ export const useFlowStore = create<FlowStore>((set, get) => ({
   },
 
   setFlowMetadata: (patch) => {
+    get().pushUndoSnapshot();
     set((s) => ({
       flowMetadata: { ...s.flowMetadata, ...patch },
     }));
@@ -229,6 +283,7 @@ export const useFlowStore = create<FlowStore>((set, get) => ({
   },
 
   addStep: () => {
+    get().pushUndoSnapshot();
     const s = get();
     const id = generateStepId(s.steps);
     const order =
@@ -261,6 +316,7 @@ export const useFlowStore = create<FlowStore>((set, get) => ({
   },
 
   updateStep: (id, patch) => {
+    get().pushUndoSnapshot();
     set((state) => ({
       steps: state.steps.map((st) =>
         st.id === id ? { ...st, ...patch } : st,
@@ -270,6 +326,7 @@ export const useFlowStore = create<FlowStore>((set, get) => ({
   },
 
   deleteStep: (id) => {
+    get().pushUndoSnapshot();
     set((state) => {
       const steps = state.steps.filter((st) => st.id !== id);
       const connections = state.connections.filter(
@@ -315,6 +372,7 @@ export const useFlowStore = create<FlowStore>((set, get) => ({
   },
 
   addTextNode: () => {
+    get().pushUndoSnapshot();
     const s = get();
     const id = `text_${Math.random().toString(36).slice(2, 11)}`;
     const x = 180 + (s.textNodes.length % 4) * 24;
@@ -338,7 +396,8 @@ export const useFlowStore = create<FlowStore>((set, get) => ({
     schedulePersist(get);
   },
 
-  updateTextNode: (id, patch) => {
+  updateTextNode: (id, patch, skipUndo) => {
+    if (!skipUndo) get().pushUndoSnapshot();
     set((state) => ({
       textNodes: state.textNodes.map((t) =>
         t.id === id ? { ...t, ...patch } : t,
@@ -348,6 +407,7 @@ export const useFlowStore = create<FlowStore>((set, get) => ({
   },
 
   deleteTextNode: (id) => {
+    get().pushUndoSnapshot();
     set((state) => {
       const textNodes = state.textNodes.filter((t) => t.id !== id);
       const selectedNodeIds = state.selectedNodeIds.filter((x) => x !== id);
@@ -422,6 +482,7 @@ export const useFlowStore = create<FlowStore>((set, get) => ({
   confirmNewConnection: (type, condition) => {
     const pending = get().pendingConnection;
     if (!pending) return;
+    get().pushUndoSnapshot();
     const conns = get().connections;
     const id = generateConnectionId(conns, pending.fromId, pending.toId);
     const conn: Connection = {
@@ -445,6 +506,7 @@ export const useFlowStore = create<FlowStore>((set, get) => ({
   },
 
   deleteConnection: (id) => {
+    get().pushUndoSnapshot();
     set((state) => ({
       connections: state.connections.filter((c) => c.id !== id),
       selectedEdgeId: state.selectedEdgeId === id ? null : state.selectedEdgeId,
@@ -453,6 +515,7 @@ export const useFlowStore = create<FlowStore>((set, get) => ({
   },
 
   updateConnection: (id, patch) => {
+    get().pushUndoSnapshot();
     set((state) => ({
       connections: state.connections.map((c) =>
         c.id === id ? { ...c, ...patch } : c,
@@ -514,6 +577,7 @@ export const useFlowStore = create<FlowStore>((set, get) => ({
         ? textNodesFromPersist
         : (normalized.textNodes ?? []);
     set({
+      undoStack: [],
       flowMetadata: normalized.flowMetadata,
       steps: normalized.steps,
       connections: normalized.connections,
@@ -570,6 +634,7 @@ export const useFlowStore = create<FlowStore>((set, get) => ({
   },
 
   cleanupHorizontalLayout: () => {
+    get().pushUndoSnapshot();
     set((state) => {
       const { nodePositions, textNodes } = computeHorizontalCleanupLayout(
         state.steps,

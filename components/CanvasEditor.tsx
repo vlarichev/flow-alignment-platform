@@ -71,8 +71,13 @@ export function CanvasEditor() {
   const selectNodeForConnection = useFlowStore(
     (s) => s.selectNodeForConnection,
   );
+  const pushUndoSnapshot = useFlowStore((s) => s.pushUndoSnapshot);
 
   const canvasSelectable = connectionMode.status === "idle";
+
+  const onNodeDragStart = useCallback(() => {
+    pushUndoSnapshot();
+  }, [pushUndoSnapshot]);
 
   const nodes: Node[] = useMemo(() => {
     const stepRf: Node[] = steps.map((st) => {
@@ -219,6 +224,7 @@ export function CanvasEditor() {
         nodeTypes={nodeTypes}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
+        onNodeDragStart={onNodeDragStart}
         onNodeClick={onNodeClick}
         onEdgeClick={onEdgeClick}
         onPaneClick={onPaneClick}

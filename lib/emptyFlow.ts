@@ -4,7 +4,7 @@ import type { FlowDocument } from "./types";
 export const emptyFlowDocument: FlowDocument = {
   flowMetadata: {
     name: "Untitled workflow",
-    version: "v1.0",
+    version: "v1.2",
     mode: "linear",
     description: "",
   },

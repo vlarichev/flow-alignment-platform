@@ -1,7 +1,7 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { BetweenHorizontalStart, LayoutGrid } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { BetweenHorizontalStart, LayoutGrid, Undo2 } from "lucide-react";
 
 import { FlowOverviewDialog } from "@/components/FlowOverviewDialog";
 import { Button } from "@/components/ui/button";
@@ -31,6 +31,29 @@ export function FileManager() {
   const cleanupHorizontalLayout = useFlowStore(
     (s) => s.cleanupHorizontalLayout,
   );
+  const undo = useFlowStore((s) => s.undo);
+  const canUndo = useFlowStore((s) => s.undoStack.length > 0);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const el = e.target as HTMLElement | null;
+      if (
+        el?.closest("input") ||
+        el?.closest("textarea") ||
+        el?.isContentEditable
+      ) {
+        return;
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z" && !e.shiftKey) {
+        const { undoStack, undo: doUndo } = useFlowStore.getState();
+        if (undoStack.length === 0) return;
+        e.preventDefault();
+        doUndo();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   const [newOpen, setNewOpen] = useState(false);
   const [newName, setNewName] = useState(flowMetadata.name);
@@ -94,6 +117,18 @@ export function FileManager() {
         </Button>
         <Button type="button" variant="outline" size="sm" onClick={() => saveToBrowser()}>
           Save to browser
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="gap-1.5"
+          disabled={!canUndo}
+          title="Undo last change (up to 5). Ctrl+Z / Cmd+Z"
+          onClick={() => undo()}
+        >
+          <Undo2 className="h-4 w-4" />
+          Undo
         </Button>
         <Button type="button" variant="outline" size="sm" onClick={() => downloadExport()}>
           Export JSON
