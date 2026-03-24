@@ -3,8 +3,11 @@
 import { NodeResizer, type NodeProps } from "@xyflow/react";
 
 import { cn } from "@/lib/utils";
-import { normalizeStepColor } from "@/lib/step-colors";
+import { hexToRgba, normalizeStepColor } from "@/lib/step-colors";
 import { useFlowStore } from "@/lib/store";
+
+/** Used when `fontSize` is omitted (older flows) or out of range. */
+const DEFAULT_NOTE_FONT_PX = 16;
 
 export type FlowTextNodeData = {
   textId: string;
@@ -21,6 +24,14 @@ export function FlowTextNode(props: NodeProps) {
 
   const text = note?.text?.trim() ? note.text : "Note — edit in the panel";
   const accent = normalizeStepColor(note?.color ?? null);
+  const fontPx =
+    typeof note?.fontSize === "number" &&
+    Number.isFinite(note.fontSize) &&
+    note.fontSize >= 10 &&
+    note.fontSize <= 40
+      ? note.fontSize
+      : DEFAULT_NOTE_FONT_PX;
+  const labelPx = Math.round(Math.max(10, fontPx * 0.72));
 
   return (
     <>
@@ -50,29 +61,33 @@ export function FlowTextNode(props: NodeProps) {
       <div
         className={cn(
           "box-border h-full w-full overflow-auto rounded-md border px-3 py-2 text-left shadow-sm transition-shadow",
-          accent
-            ? "border-border bg-card"
-            : "border-dashed border-muted-foreground/35 bg-muted/30",
+          !accent && "border-dashed border-muted-foreground/35 bg-muted/30",
           selected &&
             "ring-2 ring-ring ring-offset-2 ring-offset-background",
         )}
         style={
           accent
-            ? { borderTopWidth: 3, borderTopColor: accent }
+            ? {
+                backgroundColor: hexToRgba(accent, 0.2),
+                borderColor: hexToRgba(accent, 0.55),
+                borderStyle: "solid",
+              }
             : undefined
         }
       >
         <div
           className={cn(
-            "mb-1 text-[10px] font-semibold uppercase tracking-wide",
-            accent
-              ? "text-muted-foreground"
-              : "text-muted-foreground/90",
+            "mb-1 font-semibold uppercase tracking-wide",
+            accent ? "text-muted-foreground" : "text-muted-foreground/90",
           )}
+          style={{ fontSize: labelPx }}
         >
           Note
         </div>
-        <div className="whitespace-pre-wrap text-sm leading-snug text-foreground">
+        <div
+          className="whitespace-pre-wrap leading-snug text-foreground"
+          style={{ fontSize: fontPx }}
+        >
           {text}
         </div>
       </div>

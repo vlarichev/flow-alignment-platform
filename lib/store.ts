@@ -144,7 +144,10 @@ export interface FlowStore {
   updateTextNode: (
     id: string,
     patch: Partial<
-      Pick<FlowTextNode, "text" | "x" | "y" | "width" | "height" | "color">
+      Pick<
+        FlowTextNode,
+        "text" | "x" | "y" | "width" | "height" | "color" | "fontSize"
+      >
     >,
     /** Set true for resize/drag intermediate updates (undo pushed once at start). */
     skipUndo?: boolean,
@@ -385,6 +388,7 @@ export const useFlowStore = create<FlowStore>((set, get) => ({
       width: 280,
       height: 120,
       color: null,
+      fontSize: 16,
     };
     set({
       textNodes: [...s.textNodes, note],

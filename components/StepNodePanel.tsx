@@ -65,12 +65,35 @@ export function StepNodePanel() {
             <StepColorPicker
               compact
               label="Background color"
-              helperText={null}
+              helperText="Tints the whole note (same palette as steps)."
               value={flowText.color}
               onChange={(hex) =>
                 updateTextNode(flowText.id, { color: hex })
               }
             />
+            <div className="grid gap-2">
+              <Label htmlFor="note-font-size">Font size</Label>
+              <div className="flex items-center gap-3">
+                <Input
+                  id="note-font-size"
+                  type="number"
+                  min={10}
+                  max={40}
+                  step={1}
+                  className="w-[5.5rem]"
+                  value={flowText.fontSize ?? 16}
+                  onChange={(e) => {
+                    const raw = e.target.value;
+                    if (raw === "") return;
+                    const n = Number(raw);
+                    if (!Number.isFinite(n)) return;
+                    const clamped = Math.min(40, Math.max(10, Math.round(n)));
+                    updateTextNode(flowText.id, { fontSize: clamped });
+                  }}
+                />
+                <span className="text-xs text-muted-foreground">px (10–40)</span>
+              </div>
+            </div>
             <Separator />
             <div className="grid gap-2">
               <Label htmlFor="note-body">Text</Label>

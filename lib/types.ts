@@ -79,6 +79,8 @@ export interface FlowTextNode {
   height?: number;
   /** Optional hex color for border accent / grouping (same presets as steps). */
   color?: string | null;
+  /** Body text size in pixels (default 16 when omitted). */
+  fontSize?: number;
 }
 
 export interface FlowDocument {

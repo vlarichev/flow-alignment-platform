@@ -128,6 +128,14 @@ function normalizeTextNodes(raw: unknown): FlowTextNode[] {
         node.color = null;
       }
     }
+    if (
+      typeof o.fontSize === "number" &&
+      Number.isFinite(o.fontSize) &&
+      o.fontSize >= 10 &&
+      o.fontSize <= 40
+    ) {
+      node.fontSize = o.fontSize;
+    }
     out.push(node);
   }
   return out;
