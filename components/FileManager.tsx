@@ -151,8 +151,8 @@ export function FileManager() {
           <DialogHeader>
             <DialogTitle>New flow</DialogTitle>
             <DialogDescription>
-              Start from the built-in sample workflow (operations / manufacturing
-              demo) with a new name.
+              Creates an empty workflow with the name you choose. Add steps from
+              the palette or import JSON.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-2 py-2">
@@ -187,8 +187,8 @@ export function FileManager() {
           <DialogHeader>
             <DialogTitle>Clear all?</DialogTitle>
             <DialogDescription>
-              Reset the editor to the default example flow. This cannot be undone
-              unless you have exported JSON.
+              Reset the editor to an empty workflow. This cannot be undone unless
+              you have exported JSON.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

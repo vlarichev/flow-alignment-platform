@@ -1,4 +1,4 @@
 export {
-  demo1FlowDocument as defaultFlow,
-  demo1NodePositions as defaultNodePositions,
-} from "./demo1Flow";
+  emptyFlowDocument as defaultFlow,
+  emptyNodePositions as defaultNodePositions,
+} from "./emptyFlow";

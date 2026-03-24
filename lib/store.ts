@@ -11,10 +11,7 @@ import {
 } from "./flow-utils";
 import { computeHorizontalCleanupLayout } from "./canvas-layout";
 import {
-  DEMO1_BASELINE_LIBRARY_ID,
   MAX_FLOW_LIBRARY_ENTRIES,
-  ensureDemo1BaselineInLibrary,
-  markDemo1BaselineDismissed,
   readFlowLibrary,
   writeFlowLibrary,
 } from "./flow-library";
@@ -219,9 +216,6 @@ export const useFlowStore = create<FlowStore>((set, get) => ({
         loaded.nodePositions ?? defaultNodePositions(),
         loaded.textNodes,
       );
-    }
-    if (ensureDemo1BaselineInLibrary()) {
-      set((s) => ({ flowLibraryRevision: s.flowLibraryRevision + 1 }));
     }
   },
 
@@ -641,9 +635,6 @@ export const useFlowStore = create<FlowStore>((set, get) => ({
   },
 
   removeLibraryEntry: (id) => {
-    if (id === DEMO1_BASELINE_LIBRARY_ID) {
-      markDemo1BaselineDismissed();
-    }
     const next = readFlowLibrary().filter((e) => e.id !== id);
     writeFlowLibrary(next);
     set((state) => ({

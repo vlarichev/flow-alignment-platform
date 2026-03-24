@@ -2,7 +2,9 @@
 
 A web app for **designing, testing, and refining agentic workflows** — the kind of multi-step flows where users, systems, tools, and LLMs interact in sequence and branch. Think **Postman for the agentic age**: one place to map the journey, attach prompts and API shapes, and walk a **simulator** before you wire up real models.
 
-The **Hannover Messe** scenario in the repo is a **sample flow** (operations → manufacturing → rescheduling) to show how the product works — not the product name.
+**First load** is an **empty canvas** (no bundled customer flows). **Persistence** is your browser only; **import/export JSON** to share work. A reference **Hannover Messe–style** flow (11 steps) still lives in `lib/demo1Flow.ts` for developers who want to copy or export it — it is not shipped as default app data.
+
+![Agentic Workflow Builder — canvas, palette, flow library, and simulator](docs/preview.png)
 
 ---
 

@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTheme } from "next-themes";
 import {
   Background,
   BackgroundVariant,
@@ -36,6 +37,18 @@ function connectionLabel(c: Connection): string | undefined {
 }
 
 export function CanvasEditor() {
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+  /**
+   * next-themes resolves stored preference on the client before paint, so `resolvedTheme`
+   * can be "dark" while SSR always implied "light" — mismatch on React Flow's wrapper.
+   * Until mounted, keep React Flow in "light" to match the server; then sync to the real theme.
+   */
+  const reactFlowColorMode =
+    mounted && resolvedTheme === "dark" ? "dark" : "light";
   const steps = useFlowStore((s) => s.steps);
   const textNodes = useFlowStore((s) => s.textNodes);
   const connections = useFlowStore((s) => s.connections);
@@ -167,6 +180,7 @@ export function CanvasEditor() {
   return (
     <div className="h-full min-h-[560px] w-full rounded-lg border bg-muted/20">
       <ReactFlow
+        colorMode={reactFlowColorMode}
         nodes={nodes}
         edges={edges}
         nodeTypes={nodeTypes}

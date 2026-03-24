@@ -4,7 +4,7 @@ import { useCallback } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 
 import { cn } from "@/lib/utils";
-import { hexToRgba, normalizeStepColor } from "@/lib/step-colors";
+import { normalizeStepColor } from "@/lib/step-colors";
 import { DialogueKindIcon } from "@/components/DialogueKindIcon";
 import { useFlowStore } from "@/lib/store";
 import type { ApiCall } from "@/lib/types";
@@ -91,7 +91,6 @@ export function StepNode(props: NodeProps) {
           ? {
               borderTopWidth: 4,
               borderTopColor: accent,
-              backgroundColor: hexToRgba(accent, 0.12),
             }
           : undefined
       }
@@ -102,7 +101,6 @@ export function StepNode(props: NodeProps) {
         onPointerDown={onConnectionHandlePointerDown}
         className="cursor-connect-plus !h-3.5 !w-3.5 !min-h-[18px] !min-w-[18px] !border-2 !bg-background hover:!border-primary"
       />
-      <div className="text-xs font-medium text-muted-foreground">Step</div>
       <div className="truncate text-sm font-semibold leading-tight">
         {name || "(unnamed)"}
       </div>
@@ -113,31 +111,13 @@ export function StepNode(props: NodeProps) {
       ) : null}
 
       {hasOverviewBody ? (
-        <div className="mt-2 space-y-2 border-t border-border/60 pt-2 text-[11px] leading-snug">
-          {hasVideoId ? (
-            <div>
-              <div className="font-medium text-muted-foreground">Video ID</div>
-              <div className="mt-0.5 break-all font-mono text-foreground">
-                &quot;{videoId.trim()}&quot;
-              </div>
-            </div>
-          ) : null}
-
-          {hasApiCalls ? (
-            <div>
-              <div className="font-medium text-muted-foreground">API call</div>
-              <div className="mt-0.5 max-h-20 overflow-y-auto whitespace-pre-wrap text-foreground">
-                {summarizeApiCalls(apiCalls)}
-              </div>
-            </div>
-          ) : null}
-
+        <div className="mt-2 space-y-2 border-t border-border pt-2 text-[11px] leading-snug">
           {hasSystemPrompt ? (
             <div>
               <div className="font-medium text-muted-foreground">
                 System prompt
               </div>
-              <p className="mt-0.5 max-h-24 overflow-y-auto whitespace-pre-wrap text-foreground">
+              <p className="mt-0.5 max-h-24 overflow-y-auto whitespace-pre-wrap rounded-md border border-border bg-muted px-2 py-1.5 text-foreground">
                 {systemPrompt}
               </p>
             </div>
@@ -148,11 +128,11 @@ export function StepNode(props: NodeProps) {
               <div className="font-medium text-muted-foreground">
                 Dialogue
               </div>
-              <ul className="mt-1 max-h-32 space-y-1.5 overflow-y-auto">
+              <ul className="mt-1 max-h-32 space-y-1.5 overflow-y-auto rounded-md border border-border bg-muted p-2">
                 {dialogueLines.map((line) => (
                   <li
                     key={line.id}
-                    className="flex gap-1.5 text-[10px] leading-snug text-foreground"
+                    className="flex gap-1.5 text-[11px] leading-snug text-foreground"
                   >
                     <DialogueKindIcon
                       kind={line.kind}
@@ -167,10 +147,28 @@ export function StepNode(props: NodeProps) {
             </div>
           ) : null}
 
+          {hasVideoId ? (
+            <div>
+              <div className="font-medium text-muted-foreground">Video ID</div>
+              <div className="mt-0.5 break-all rounded-md border border-border bg-muted px-2 py-1 font-mono text-foreground">
+                &quot;{videoId.trim()}&quot;
+              </div>
+            </div>
+          ) : null}
+
+          {hasApiCalls ? (
+            <div>
+              <div className="font-medium text-muted-foreground">API call</div>
+              <div className="mt-0.5 max-h-20 overflow-y-auto whitespace-pre-wrap rounded-md border border-border bg-muted px-2 py-1 text-foreground">
+                {summarizeApiCalls(apiCalls)}
+              </div>
+            </div>
+          ) : null}
+
           {hasInputData ? (
             <div>
               <div className="font-medium text-muted-foreground">Input data</div>
-              <pre className="mt-0.5 max-h-28 overflow-auto rounded-md border border-border/80 bg-muted/40 p-2 font-mono text-[10px] leading-relaxed text-foreground">
+              <pre className="mt-0.5 max-h-28 overflow-auto rounded-md border border-border bg-muted p-2 font-mono text-[10px] leading-relaxed text-foreground">
                 {inputDataJson}
               </pre>
             </div>
