@@ -42,9 +42,9 @@ export function FlowLibraryPanel() {
         <div className="min-w-0 space-y-4 p-4">
           <p className="break-words text-xs leading-relaxed text-muted-foreground">
             Save named snapshots of the current flow (steps, connections, canvas
-            layout). Click <span className="font-medium text-foreground">Load</span>{" "}
-            to restore one—your current work is kept automatically as
-            &quot;Previous&quot; at the top of the list.
+            layout). <span className="font-medium text-foreground">Load</span> replaces
+            the editor with that snapshot—save first if you need a copy of your current
+            work.
           </p>
           <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-stretch">
             <Input

@@ -69,6 +69,11 @@ export function Palette() {
           <GitBranch className="h-4 w-4" />
           Simulator
         </Button>
+        <p className="text-xs text-muted-foreground">
+          With the canvas focused: <span className="font-medium text-foreground">Delete</span>{" "}
+          or <span className="font-medium text-foreground">Backspace</span> removes the
+          selected step, flow text, or connection.
+        </p>
       </CardContent>
     </Card>
   );

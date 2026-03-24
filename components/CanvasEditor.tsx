@@ -9,9 +9,11 @@ import {
   MiniMap,
   ReactFlow,
   type Edge,
+  type EdgeChange,
   type Node,
   type NodeChange,
   type NodeTypes,
+  type OnEdgesChange,
   type OnNodesChange,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
@@ -59,6 +61,9 @@ export function CanvasEditor() {
 
   const setNodePosition = useFlowStore((s) => s.setNodePosition);
   const setSelectedEdgeId = useFlowStore((s) => s.setSelectedEdgeId);
+  const deleteStep = useFlowStore((s) => s.deleteStep);
+  const deleteTextNode = useFlowStore((s) => s.deleteTextNode);
+  const deleteConnection = useFlowStore((s) => s.deleteConnection);
   const applyNodeSelectChanges = useFlowStore(
     (s) => s.applyNodeSelectChanges,
   );
@@ -134,6 +139,16 @@ export function CanvasEditor() {
         selected: boolean;
       }[] = [];
       for (const ch of changes) {
+        if (ch.type === "remove" && ch.id) {
+          if (connectionMode.status !== "idle") continue;
+          const s = useFlowStore.getState();
+          if (s.steps.some((st) => st.id === ch.id)) {
+            deleteStep(ch.id);
+          } else if (s.textNodes.some((t) => t.id === ch.id)) {
+            deleteTextNode(ch.id);
+          }
+          continue;
+        }
         if (ch.type === "position" && ch.id && ch.position) {
           setNodePosition(ch.id, ch.position);
         } else if (ch.type === "select") {
@@ -144,7 +159,25 @@ export function CanvasEditor() {
         applyNodeSelectChanges(selectChanges);
       }
     },
-    [setNodePosition, applyNodeSelectChanges],
+    [
+      connectionMode.status,
+      deleteStep,
+      deleteTextNode,
+      setNodePosition,
+      applyNodeSelectChanges,
+    ],
+  );
+
+  const onEdgesChange: OnEdgesChange = useCallback(
+    (changes: EdgeChange[]) => {
+      for (const ch of changes) {
+        if (ch.type === "remove" && ch.id) {
+          if (connectionMode.status !== "idle") continue;
+          deleteConnection(ch.id);
+        }
+      }
+    },
+    [connectionMode.status, deleteConnection],
   );
 
   const onNodeClick = useCallback(
@@ -185,9 +218,11 @@ export function CanvasEditor() {
         edges={edges}
         nodeTypes={nodeTypes}
         onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
         onNodeClick={onNodeClick}
         onEdgeClick={onEdgeClick}
         onPaneClick={onPaneClick}
+        deleteKeyCode={["Backspace", "Delete"]}
         fitView
         minZoom={0.2}
         maxZoom={1.5}

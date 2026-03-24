@@ -608,30 +608,12 @@ export const useFlowStore = create<FlowStore>((set, get) => ({
     const entries = readFlowLibrary();
     const entry = entries.find((e) => e.id === id);
     if (!entry) return;
-    const s = get();
-    const backup: FlowLibraryEntry = {
-      id: `prev_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
-      name: `Previous — ${new Date().toLocaleString()}`,
-      savedAt: new Date().toISOString(),
-      payload: {
-        flowMetadata: s.flowMetadata,
-        steps: s.steps,
-        connections: s.connections,
-        nodePositions: s.nodePositions,
-        textNodes: s.textNodes,
-      },
-    };
-    const next = [backup, ...entries].slice(0, MAX_FLOW_LIBRARY_ENTRIES);
-    writeFlowLibrary(next);
     const doc = persistedToDocument(entry.payload);
     get().loadDocument(
       doc,
       entry.payload.nodePositions,
       entry.payload.textNodes,
     );
-    set((state) => ({
-      flowLibraryRevision: state.flowLibraryRevision + 1,
-    }));
   },
 
   removeLibraryEntry: (id) => {
