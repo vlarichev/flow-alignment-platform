@@ -15,7 +15,7 @@ export default function HomePage() {
     <div className="flex min-h-screen flex-col">
       <FlowHydration />
       <FileManager />
-      <main className="grid min-h-0 flex-1 grid-cols-1 grid-rows-[auto_1fr] overflow-hidden lg:grid-cols-[220px_1fr_minmax(280px,380px)] lg:grid-rows-1">
+      <main className="grid min-h-0 flex-1 grid-cols-1 grid-rows-[auto_1fr] overflow-hidden lg:grid-cols-[220px_minmax(0,1fr)_minmax(0,380px)] lg:grid-rows-1">
         <aside className="border-b p-3 lg:border-b-0 lg:border-r">
           <Palette />
         </aside>
@@ -24,7 +24,7 @@ export default function HomePage() {
             <CanvasEditor />
           </ReactFlowProvider>
         </section>
-        <aside className="min-h-0 border-t lg:border-l lg:border-t-0">
+        <aside className="min-h-0 min-w-0 overflow-hidden border-t lg:border-l lg:border-t-0">
           <StepNodePanel />
         </aside>
       </main>

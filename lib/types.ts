@@ -40,6 +40,8 @@ export interface DialogueLine {
 export interface Step {
   id: string;
   name: string;
+  /** Owning product or system (e.g. ERP, NX, A4M) for labeling and alignment. */
+  systemName?: string;
   order: number;
   systemPrompt: string;
   inputData: StepInputData;
@@ -90,4 +92,12 @@ export interface PersistedFlowState {
   connections: Connection[];
   nodePositions: Record<string, { x: number; y: number }>;
   textNodes?: FlowTextNode[];
+}
+
+/** Named snapshot stored in the browser flow library (versions / backups). */
+export interface FlowLibraryEntry {
+  id: string;
+  name: string;
+  savedAt: string;
+  payload: PersistedFlowState;
 }

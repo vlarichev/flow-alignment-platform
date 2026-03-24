@@ -56,9 +56,10 @@ export function SimulatorView() {
     <Dialog open={sim.isOpen} onOpenChange={(o) => !o && closeSimulator()}>
       <DialogContent className="flex max-h-[90vh] max-w-2xl flex-col gap-0 overflow-hidden p-0">
         <DialogHeader className="border-b px-6 py-4">
-          <DialogTitle>Simulator</DialogTitle>
+          <DialogTitle>Flow simulator</DialogTitle>
           <DialogDescription>
-            Step through the flow and preview data and mock API responses.
+            Walk the workflow step by step and inspect prompts, dialogue, and
+            mock API payloads.
           </DialogDescription>
         </DialogHeader>
 
@@ -256,10 +257,12 @@ export function SimulatorView() {
                             <span className="font-medium">
                               {steps.find((s) => s.id === c.to)?.name ?? c.to}
                             </span>
-                            <span className="mt-0.5 block text-xs text-muted-foreground">
-                              {c.type}
-                              {c.condition ? ` · ${c.condition}` : ""}
-                            </span>
+                            {c.type !== "linear" ? (
+                              <span className="mt-0.5 block text-xs text-muted-foreground">
+                                {c.type}
+                                {c.condition ? ` · ${c.condition}` : ""}
+                              </span>
+                            ) : null}
                           </span>
                         </Button>
                       ))}

@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
+import { FlowLibraryPanel } from "@/components/FlowLibraryPanel";
 import { StepColorPicker } from "@/components/StepColorPicker";
 import { StepDialogueEditor } from "@/components/StepDialogueEditor";
 import { createEmptyApiCall, useFlowStore } from "@/lib/store";
@@ -42,7 +43,7 @@ export function StepNodePanel() {
 
   if (selectedTextNodeId && flowText) {
     return (
-      <div className="flex h-full min-h-0 flex-col border-l bg-card">
+      <div className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden border-l bg-card">
         <div className="flex items-start justify-between gap-2 border-b px-4 py-3">
           <div className="min-w-0">
             <h2 className="text-sm font-semibold">Flow text</h2>
@@ -86,7 +87,7 @@ export function StepNodePanel() {
 
   if (selectedEdgeId && edge) {
     return (
-      <div className="flex h-full min-h-0 flex-col border-l bg-card">
+      <div className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden border-l bg-card">
         <div className="border-b px-4 py-3">
           <h2 className="text-sm font-semibold">Connection</h2>
           <p className="text-xs text-muted-foreground">
@@ -144,8 +145,8 @@ export function StepNodePanel() {
 
   if (!step) {
     return (
-      <div className="flex h-full min-h-[200px] flex-col items-center justify-center border-l bg-card px-6 text-center text-sm text-muted-foreground">
-        Select a step or connection on the canvas.
+      <div className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden border-l bg-card">
+        <FlowLibraryPanel />
       </div>
     );
   }
@@ -166,7 +167,7 @@ export function StepNodePanel() {
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-col border-l bg-card">
+    <div className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden border-l bg-card">
       <div className="flex items-start justify-between gap-2 border-b px-4 py-3">
         <div className="min-w-0">
           <h2 className="truncate text-sm font-semibold">Step properties</h2>
@@ -189,6 +190,22 @@ export function StepNodePanel() {
               id="step-name"
               value={st.name}
               onChange={(e) => updateStep(st.id, { name: e.target.value })}
+            />
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="step-system-name">System</Label>
+            <Input
+              id="step-system-name"
+              value={st.systemName ?? ""}
+              onChange={(e) =>
+                updateStep(st.id, {
+                  systemName: e.target.value.trim()
+                    ? e.target.value
+                    : undefined,
+                })
+              }
+              placeholder="e.g. ERP, NX, A4M"
             />
           </div>
 

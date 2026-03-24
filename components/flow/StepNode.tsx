@@ -1,5 +1,6 @@
 "use client";
 
+import { useCallback } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 
 import { cn } from "@/lib/utils";
@@ -52,6 +53,31 @@ export function StepNode(props: NodeProps) {
   const inputDataJson = JSON.stringify(fakeData, null, 2);
   const dialogueLines = step?.dialogueSequence ?? [];
 
+  const hasVideoId = Boolean(videoId?.trim());
+  const hasApiCalls = apiCalls.length > 0;
+  const hasSystemPrompt = Boolean(systemPrompt);
+  const hasDialogue = dialogueLines.length > 0;
+  const hasInputData = Object.keys(fakeData).length > 0;
+  const hasOverviewBody =
+    hasVideoId ||
+    hasApiCalls ||
+    hasSystemPrompt ||
+    hasDialogue ||
+    hasInputData;
+
+  const onConnectionHandlePointerDown = useCallback(
+    (e: React.PointerEvent) => {
+      e.stopPropagation();
+      e.preventDefault();
+      const store = useFlowStore.getState();
+      if (store.connectionMode.status === "idle") {
+        store.beginAddConnection();
+      }
+      store.selectNodeForConnection(data.stepId);
+    },
+    [data.stepId],
+  );
+
   return (
     <div
       className={cn(
@@ -63,8 +89,8 @@ export function StepNode(props: NodeProps) {
       style={
         accent
           ? {
-              borderLeftWidth: 4,
-              borderLeftColor: accent,
+              borderTopWidth: 4,
+              borderTopColor: accent,
               backgroundColor: hexToRgba(accent, 0.12),
             }
           : undefined
@@ -72,72 +98,91 @@ export function StepNode(props: NodeProps) {
     >
       <Handle
         type="target"
-        position={Position.Top}
-        className="!h-2.5 !w-2.5 !border-2 !bg-background"
+        position={Position.Left}
+        onPointerDown={onConnectionHandlePointerDown}
+        className="cursor-connect-plus !h-3.5 !w-3.5 !min-h-[18px] !min-w-[18px] !border-2 !bg-background hover:!border-primary"
       />
       <div className="text-xs font-medium text-muted-foreground">Step</div>
       <div className="truncate text-sm font-semibold leading-tight">
         {name || "(unnamed)"}
       </div>
-
-      <div className="mt-2 space-y-2 border-t border-border/60 pt-2 text-[11px] leading-snug">
-        <div>
-          <div className="font-medium text-muted-foreground">Video ID</div>
-          <div className="mt-0.5 break-all font-mono text-foreground">
-            {videoId ? `"${videoId}"` : "—"}
-          </div>
+      {step?.systemName ? (
+        <div className="truncate text-[11px] text-muted-foreground">
+          {step.systemName}
         </div>
+      ) : null}
 
-        <div>
-          <div className="font-medium text-muted-foreground">API call</div>
-          <div className="mt-0.5 max-h-20 overflow-y-auto whitespace-pre-wrap text-foreground">
-            {summarizeApiCalls(apiCalls)}
-          </div>
-        </div>
-
-        <div>
-          <div className="font-medium text-muted-foreground">System prompt</div>
-          <p className="mt-0.5 max-h-24 overflow-y-auto whitespace-pre-wrap text-foreground">
-            {systemPrompt || "—"}
-          </p>
-        </div>
-
-        {dialogueLines.length > 0 ? (
-          <div>
-            <div className="font-medium text-muted-foreground">
-              Dialogue
+      {hasOverviewBody ? (
+        <div className="mt-2 space-y-2 border-t border-border/60 pt-2 text-[11px] leading-snug">
+          {hasVideoId ? (
+            <div>
+              <div className="font-medium text-muted-foreground">Video ID</div>
+              <div className="mt-0.5 break-all font-mono text-foreground">
+                &quot;{videoId.trim()}&quot;
+              </div>
             </div>
-            <ul className="mt-1 max-h-32 space-y-1.5 overflow-y-auto">
-              {dialogueLines.map((line) => (
-                <li
-                  key={line.id}
-                  className="flex gap-1.5 text-[10px] leading-snug text-foreground"
-                >
-                  <DialogueKindIcon
-                    kind={line.kind}
-                    className="mt-0.5 h-3 w-3 shrink-0 text-muted-foreground"
-                  />
-                  <span className="min-w-0 break-words">
-                    {line.text.trim() ? line.text : "…"}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ) : null}
+          ) : null}
 
-        <div>
-          <div className="font-medium text-muted-foreground">Input data</div>
-          <pre className="mt-0.5 max-h-28 overflow-auto rounded-md border border-border/80 bg-muted/40 p-2 font-mono text-[10px] leading-relaxed text-foreground">
-            {inputDataJson === "{}" ? "{}" : inputDataJson}
-          </pre>
+          {hasApiCalls ? (
+            <div>
+              <div className="font-medium text-muted-foreground">API call</div>
+              <div className="mt-0.5 max-h-20 overflow-y-auto whitespace-pre-wrap text-foreground">
+                {summarizeApiCalls(apiCalls)}
+              </div>
+            </div>
+          ) : null}
+
+          {hasSystemPrompt ? (
+            <div>
+              <div className="font-medium text-muted-foreground">
+                System prompt
+              </div>
+              <p className="mt-0.5 max-h-24 overflow-y-auto whitespace-pre-wrap text-foreground">
+                {systemPrompt}
+              </p>
+            </div>
+          ) : null}
+
+          {hasDialogue ? (
+            <div>
+              <div className="font-medium text-muted-foreground">
+                Dialogue
+              </div>
+              <ul className="mt-1 max-h-32 space-y-1.5 overflow-y-auto">
+                {dialogueLines.map((line) => (
+                  <li
+                    key={line.id}
+                    className="flex gap-1.5 text-[10px] leading-snug text-foreground"
+                  >
+                    <DialogueKindIcon
+                      kind={line.kind}
+                      className="mt-0.5 h-3 w-3 shrink-0 text-muted-foreground"
+                    />
+                    <span className="min-w-0 break-words">
+                      {line.text.trim() ? line.text : "…"}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
+          {hasInputData ? (
+            <div>
+              <div className="font-medium text-muted-foreground">Input data</div>
+              <pre className="mt-0.5 max-h-28 overflow-auto rounded-md border border-border/80 bg-muted/40 p-2 font-mono text-[10px] leading-relaxed text-foreground">
+                {inputDataJson}
+              </pre>
+            </div>
+          ) : null}
         </div>
-      </div>
+      ) : null}
 
       <Handle
         type="source"
-        position={Position.Bottom}
-        className="!h-2.5 !w-2.5 !border-2 !bg-background"
+        position={Position.Right}
+        onPointerDown={onConnectionHandlePointerDown}
+        className="cursor-connect-plus !h-3.5 !w-3.5 !min-h-[18px] !min-w-[18px] !border-2 !bg-background hover:!border-primary"
       />
     </div>
   );

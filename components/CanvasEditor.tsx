@@ -17,6 +17,7 @@ import "@xyflow/react/dist/style.css";
 
 import { FlowTextNode } from "@/components/flow/FlowTextNode";
 import { StepNode, type StepNodeData } from "@/components/flow/StepNode";
+import { STEP_NODE_HEIGHT, STEP_NODE_WIDTH } from "@/lib/canvas-layout";
 import { normalizeStepColor } from "@/lib/step-colors";
 import { useFlowStore } from "@/lib/store";
 import type { Connection } from "@/lib/types";
@@ -26,7 +27,8 @@ const nodeTypes = {
   flowText: FlowTextNode,
 } as const satisfies NodeTypes;
 
-function connectionLabel(c: Connection): string {
+function connectionLabel(c: Connection): string | undefined {
+  if (c.type === "linear") return undefined;
   if (c.type === "conditional" && c.condition) {
     return `${c.type}: ${c.condition}`;
   }
@@ -67,6 +69,8 @@ export function CanvasEditor() {
         id: st.id,
         type: "demoStep",
         position: pos,
+        width: STEP_NODE_WIDTH,
+        height: STEP_NODE_HEIGHT,
         data,
         selected: selectedNodeIds.includes(st.id),
         selectable: canvasSelectable,
@@ -94,15 +98,18 @@ export function CanvasEditor() {
 
   const edges: Edge[] = useMemo(
     () =>
-      connections.map((c) => ({
-        id: c.id,
-        source: c.from,
-        target: c.to,
-        label: connectionLabel(c),
-        type: "smoothstep",
-        selected: selectedEdgeId === c.id,
-        style: { strokeWidth: selectedEdgeId === c.id ? 2.5 : 1.5 },
-      })),
+      connections.map((c) => {
+        const label = connectionLabel(c);
+        return {
+          id: c.id,
+          source: c.from,
+          target: c.to,
+          ...(label !== undefined ? { label } : {}),
+          type: "smoothstep" as const,
+          selected: selectedEdgeId === c.id,
+          style: { strokeWidth: selectedEdgeId === c.id ? 2.5 : 1.5 },
+        };
+      }),
     [connections, selectedEdgeId],
   );
 
@@ -182,6 +189,8 @@ export function CanvasEditor() {
           className="!bg-card"
           zoomable
           pannable
+          nodeStrokeWidth={2}
+          nodeStrokeColor="hsl(var(--border))"
           nodeColor={(node) => {
             if (node.type === "flowText") return "#fbbf24";
             const st = steps.find((s) => s.id === node.id);

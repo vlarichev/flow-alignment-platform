@@ -28,3 +28,8 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
+
+# User flow exports / local snapshots (import via app; keep repo free of personal data)
+/exports/
+/user-flows/
+*.flow.local.json

@@ -9,11 +9,21 @@ import {
   normalizeFlowDocument,
   persistedToDocument,
 } from "./flow-utils";
+import { computeHorizontalCleanupLayout } from "./canvas-layout";
+import {
+  DEMO1_BASELINE_LIBRARY_ID,
+  MAX_FLOW_LIBRARY_ENTRIES,
+  ensureDemo1BaselineInLibrary,
+  markDemo1BaselineDismissed,
+  readFlowLibrary,
+  writeFlowLibrary,
+} from "./flow-library";
 import type {
   ApiCall,
   Connection,
   ConnectionType,
   FlowDocument,
+  FlowLibraryEntry,
   FlowMetadata,
   FlowTextNode,
   PersistedFlowState,
@@ -156,6 +166,14 @@ export interface FlowStore {
   saveToBrowser: () => void;
   exportJson: () => string;
   clearAll: () => void;
+  /** Place steps in one horizontal row by order; flow-text notes on a second row. */
+  cleanupHorizontalLayout: () => void;
+
+  /** Bumps when the browser flow library list changes (for UI refresh). */
+  flowLibraryRevision: number;
+  saveCurrentToLibrary: (name: string) => void;
+  loadFromLibrary: (id: string) => void;
+  removeLibraryEntry: (id: string) => void;
 
   openSimulator: () => void;
   closeSimulator: () => void;
@@ -191,14 +209,20 @@ export const useFlowStore = create<FlowStore>((set, get) => ({
 
   simulator: initialSimulator(),
 
+  flowLibraryRevision: 0,
+
   hydrateFromStorage: () => {
     const loaded = loadFromStorage();
-    if (!loaded) return;
-    get().loadDocument(
-      persistedToDocument(loaded),
-      loaded.nodePositions ?? defaultNodePositions(),
-      loaded.textNodes,
-    );
+    if (loaded) {
+      get().loadDocument(
+        persistedToDocument(loaded),
+        loaded.nodePositions ?? defaultNodePositions(),
+        loaded.textNodes,
+      );
+    }
+    if (ensureDemo1BaselineInLibrary()) {
+      set((s) => ({ flowLibraryRevision: s.flowLibraryRevision + 1 }));
+    }
   },
 
   setFlowMetadata: (patch) => {
@@ -218,6 +242,7 @@ export const useFlowStore = create<FlowStore>((set, get) => ({
     const newStep: Step = {
       id,
       name: `Step ${order}`,
+      systemName: undefined,
       order,
       systemPrompt: "",
       inputData: { fakeData: {} },
@@ -226,8 +251,8 @@ export const useFlowStore = create<FlowStore>((set, get) => ({
       apiCalls: [],
       dialogueSequence: [],
     };
-    const x = 120 + (s.steps.length % 4) * 40;
-    const y = 120 + Math.floor(s.steps.length / 4) * 160;
+    const x = 80 + s.steps.length * 400;
+    const y = 120;
     set({
       steps: [...s.steps, newStep],
       nodePositions: { ...s.nodePositions, [id]: { x, y } },
@@ -545,6 +570,85 @@ export const useFlowStore = create<FlowStore>((set, get) => ({
 
   clearAll: () => {
     get().loadDocument(structuredClone(defaultFlow), defaultNodePositions());
+  },
+
+  cleanupHorizontalLayout: () => {
+    set((state) => {
+      const { nodePositions, textNodes } = computeHorizontalCleanupLayout(
+        state.steps,
+        state.textNodes,
+      );
+      return { nodePositions, textNodes };
+    });
+    schedulePersist(get);
+  },
+
+  saveCurrentToLibrary: (name) => {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    const s = get();
+    const payload: PersistedFlowState = {
+      flowMetadata: s.flowMetadata,
+      steps: s.steps,
+      connections: s.connections,
+      nodePositions: s.nodePositions,
+      textNodes: s.textNodes,
+    };
+    const entry: FlowLibraryEntry = {
+      id: `lib_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
+      name: trimmed,
+      savedAt: new Date().toISOString(),
+      payload,
+    };
+    const next = [entry, ...readFlowLibrary()].slice(
+      0,
+      MAX_FLOW_LIBRARY_ENTRIES,
+    );
+    writeFlowLibrary(next);
+    set((state) => ({
+      flowLibraryRevision: state.flowLibraryRevision + 1,
+    }));
+  },
+
+  loadFromLibrary: (id) => {
+    const entries = readFlowLibrary();
+    const entry = entries.find((e) => e.id === id);
+    if (!entry) return;
+    const s = get();
+    const backup: FlowLibraryEntry = {
+      id: `prev_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+      name: `Previous — ${new Date().toLocaleString()}`,
+      savedAt: new Date().toISOString(),
+      payload: {
+        flowMetadata: s.flowMetadata,
+        steps: s.steps,
+        connections: s.connections,
+        nodePositions: s.nodePositions,
+        textNodes: s.textNodes,
+      },
+    };
+    const next = [backup, ...entries].slice(0, MAX_FLOW_LIBRARY_ENTRIES);
+    writeFlowLibrary(next);
+    const doc = persistedToDocument(entry.payload);
+    get().loadDocument(
+      doc,
+      entry.payload.nodePositions,
+      entry.payload.textNodes,
+    );
+    set((state) => ({
+      flowLibraryRevision: state.flowLibraryRevision + 1,
+    }));
+  },
+
+  removeLibraryEntry: (id) => {
+    if (id === DEMO1_BASELINE_LIBRARY_ID) {
+      markDemo1BaselineDismissed();
+    }
+    const next = readFlowLibrary().filter((e) => e.id !== id);
+    writeFlowLibrary(next);
+    set((state) => ({
+      flowLibraryRevision: state.flowLibraryRevision + 1,
+    }));
   },
 
   openSimulator: () => {

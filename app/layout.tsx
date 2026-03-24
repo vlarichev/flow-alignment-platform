@@ -16,8 +16,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Hannover Messe Demo Flow Editor",
-  description: "Edit and simulate demo flows for the trade show",
+  title: "Agentic Workflow Builder",
+  description:
+    "Design, test, and optimize multi-step agentic workflows — like Postman for the agentic age.",
 };
 
 export default function RootLayout({

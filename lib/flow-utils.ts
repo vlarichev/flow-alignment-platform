@@ -180,8 +180,8 @@ export function mergeNodePositions(
   for (const s of newSteps) {
     if (!next[s.id]) {
       next[s.id] = {
-        x: 120 + (i % 4) * 48,
-        y: 120 + Math.floor(i / 4) * 160,
+        x: 80 + (i % 8) * 400,
+        y: 120 + Math.floor(i / 8) * 220,
       };
     }
     i += 1;

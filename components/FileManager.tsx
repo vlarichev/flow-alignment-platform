@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { LayoutGrid } from "lucide-react";
+import { BetweenHorizontalStart, LayoutGrid } from "lucide-react";
 
 import { FlowOverviewDialog } from "@/components/FlowOverviewDialog";
 import { Button } from "@/components/ui/button";
@@ -28,6 +28,9 @@ export function FileManager() {
   const saveToBrowser = useFlowStore((s) => s.saveToBrowser);
   const exportJson = useFlowStore((s) => s.exportJson);
   const clearAll = useFlowStore((s) => s.clearAll);
+  const cleanupHorizontalLayout = useFlowStore(
+    (s) => s.cleanupHorizontalLayout,
+  );
 
   const [newOpen, setNewOpen] = useState(false);
   const [newName, setNewName] = useState(flowMetadata.name);
@@ -77,9 +80,12 @@ export function FileManager() {
       <header className="flex flex-wrap items-center gap-2 border-b bg-card px-4 py-3">
         <div className="mr-auto min-w-0">
           <h1 className="truncate text-sm font-semibold md:text-base">
-            Hannover Messe Demo Editor
+            Agentic Workflow Builder
           </h1>
           <p className="truncate text-xs text-muted-foreground">
+            Like Postman for agentic flows — design, simulate, iterate.
+          </p>
+          <p className="truncate text-[11px] text-muted-foreground/90">
             {flowMetadata.name} · {flowMetadata.version} · {flowMetadata.mode}
           </p>
         </div>
@@ -99,6 +105,17 @@ export function FileManager() {
           onClick={() => importRef.current?.click()}
         >
           Import JSON
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="gap-1.5"
+          title="Align all steps in one row by order; notes on a second row below"
+          onClick={() => cleanupHorizontalLayout()}
+        >
+          <BetweenHorizontalStart className="h-4 w-4" />
+          Clean up layout
         </Button>
         <Button
           type="button"
@@ -134,7 +151,8 @@ export function FileManager() {
           <DialogHeader>
             <DialogTitle>New flow</DialogTitle>
             <DialogDescription>
-              Start from the default Hannover Messe template with a new name.
+              Start from the built-in sample workflow (operations / manufacturing
+              demo) with a new name.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-2 py-2">

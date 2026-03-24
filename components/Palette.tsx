@@ -56,8 +56,8 @@ export function Palette() {
         {connecting ? (
           <p className="text-xs text-muted-foreground">
             {connectionMode.status === "pickSource"
-              ? "Click a source node, then a target node."
-              : "Click the target node."}
+              ? "Click a step or its left/right handle (source), then the target step."
+              : "Click the target step or a handle on it."}
           </p>
         ) : null}
         <Button
