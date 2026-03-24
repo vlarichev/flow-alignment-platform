@@ -1,7 +1,8 @@
 import type { FlowTextNode, Step } from "./types";
 
-/** Matches `StepNode` / CanvasEditor step dimensions (handles + minimap). */
+/** Typical step width for horizontal layout spacing (cards use min/max width in CSS). */
 export const STEP_NODE_WIDTH = 320;
+/** Legacy reference height for note row offset; step nodes size to content in React Flow. */
 export const STEP_NODE_HEIGHT = 520;
 
 /** Gap between adjacent node boxes (no overlap). */

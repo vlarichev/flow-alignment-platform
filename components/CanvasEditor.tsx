@@ -20,7 +20,6 @@ import "@xyflow/react/dist/style.css";
 
 import { FlowTextNode } from "@/components/flow/FlowTextNode";
 import { StepNode, type StepNodeData } from "@/components/flow/StepNode";
-import { STEP_NODE_HEIGHT, STEP_NODE_WIDTH } from "@/lib/canvas-layout";
 import { normalizeStepColor } from "@/lib/step-colors";
 import { useFlowStore } from "@/lib/store";
 import type { Connection } from "@/lib/types";
@@ -92,8 +91,9 @@ export function CanvasEditor() {
         id: st.id,
         type: "demoStep",
         position: pos,
-        width: STEP_NODE_WIDTH,
-        height: STEP_NODE_HEIGHT,
+        // No fixed width/height: step cards vary with content. A fixed tall box
+        // (previously STEP_NODE_HEIGHT) made a huge invisible hit area below the
+        // card — clicks on "empty" canvas still selected the node and felt buggy.
         data,
         selected: selectedNodeIds.includes(st.id),
         selectable: canvasSelectable,

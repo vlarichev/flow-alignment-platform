@@ -17,12 +17,7 @@ export type StepNodeData = {
   color?: string | null;
 };
 
-/**
- * Pixel offset from the node top for connection handles.
- * Step nodes use a fixed React Flow box height (`STEP_NODE_HEIGHT`); RF defaults
- * to vertically centering handles, which puts them in empty space when the card
- * is short. The title row is always present — pin handles there.
- */
+/** Pixel offset from node top so handles sit on the title row (RF defaults to 50% height). */
 const STEP_HANDLE_TOP_PX = 30;
 
 function summarizeApiCalls(calls: ApiCall[]): string {
